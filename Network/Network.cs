@@ -3,6 +3,7 @@ using DimensionalStorage.Components;
 using DimensionalStorage.Items;
 using System.Collections.Generic;
 using System.Linq;
+using Terraria;
 using Controller = DimensionalStorage.Components.Controller;
 using DriveBay = DimensionalStorage.Components.DriveBay;
 
@@ -16,9 +17,9 @@ namespace DimensionalStorage.Network
 
 		public bool IsValid => Cables.Count(cable => cable.Component is Controller) == 1;
 
-		public int DriveCapacity => Cables.Sum(cable => cable.Component?.DriveCapacity ?? 0);
+		public int DriveCapacity => GetComponents().Sum(component => component.DriveCapacity);
 
-		public int IOCapacity => Cables.Sum(cable => cable.Component?.IOCapacity ?? 0);
+		public int PortCapacity => GetComponents().Sum(component => component.PortCapacity);
 
 		public IEnumerable<BaseComponent> GetComponents()
 		{
@@ -44,6 +45,22 @@ namespace DimensionalStorage.Network
 				}
 			}
 		}
+
+		public IEnumerable<BasePort> GetPorts()
+		{
+			int count = 0;
+			foreach (BaseComponent component in GetComponents())
+			{
+				if (component is BasePort port)
+				{
+					count++;
+					if (count > PortCapacity) yield break;
+					yield return port;
+				}
+			}
+		}
+
+		public List<Item> Items => GetDrives().SelectMany(drive => drive.Items).ToList();
 
 		public Network(Cable tube)
 		{
@@ -87,6 +104,12 @@ namespace DimensionalStorage.Network
 
 		public void Update()
 		{
+			if (!IsValid) return;
+
+			foreach (BasePort port in GetPorts())
+			{
+				port.Update();
+			}
 		}
 	}
 }

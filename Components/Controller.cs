@@ -4,7 +4,7 @@
 	{
 		public override int DropItem => DimensionalStorage.Instance.ItemType<Items.Controller>();
 
-		public override int IOCapacity => 8;
+		public override int PortCapacity => 8;
 		public override int DriveCapacity => 4;
 	}
 }

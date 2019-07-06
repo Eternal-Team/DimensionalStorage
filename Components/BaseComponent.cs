@@ -13,7 +13,7 @@ namespace DimensionalStorage.Components
 		public abstract int DropItem { get; }
 
 		public virtual int DriveCapacity => 0;
-		public virtual int IOCapacity => 0;
+		public virtual int PortCapacity => 0;
 
 		public virtual void Draw(SpriteBatch spriteBatch)
 		{
@@ -24,7 +24,6 @@ namespace DimensionalStorage.Components
 
 		public virtual void Update()
 		{
-
 		}
 
 		public virtual bool Interact() => false;

@@ -7,7 +7,7 @@ using Terraria.ModLoader.IO;
 
 namespace DimensionalStorage.Items
 {
-	public class BaseDrive : BaseItem, IItemHandler
+	public abstract class BaseDrive : BaseItem, IItemHandler
 	{
 		public override bool CloneNewInstances => true;
 
@@ -53,6 +53,14 @@ namespace DimensionalStorage.Items
 		public override void NetRecieve(BinaryReader reader)
 		{
 			Handler.Deserialize(reader);
+		}
+	}
+
+	public class BasicDrive : BaseDrive
+	{
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Basic Drive");
 		}
 	}
 }
