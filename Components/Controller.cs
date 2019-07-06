@@ -3,5 +3,8 @@
 	public class Controller : BaseComponent
 	{
 		public override int DropItem => DimensionalStorage.Instance.ItemType<Items.Controller>();
+
+		public override int IOCapacity => 8;
+		public override int DriveCapacity => 4;
 	}
 }
