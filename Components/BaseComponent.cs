@@ -12,6 +12,9 @@ namespace DimensionalStorage.Components
 		public Cable Parent;
 		public abstract int DropItem { get; }
 
+		public virtual int DriveCapacity => 0;
+		public virtual int IOCapacity => 0;
+
 		public virtual void Draw(SpriteBatch spriteBatch)
 		{
 			Vector2 position = Parent.Position.ToScreenCoordinates();
@@ -21,8 +24,10 @@ namespace DimensionalStorage.Components
 
 		public virtual void Update()
 		{
-			Main.NewText(Parent.Network.IsValid);
+
 		}
+
+		public virtual bool Interact() => false;
 
 		public virtual TagCompound Save() => new TagCompound();
 

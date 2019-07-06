@@ -56,8 +56,14 @@ namespace DimensionalStorage.Network
 			base.Remove();
 		}
 
-		public override void Interact()
+		public override bool Interact()
 		{
+			if (TryGetValue(Player.tileTargetX, Player.tileTargetY, out Cable cable))
+			{
+				return cable.Interact();
+			}
+
+			return false;
 		}
 	}
 }

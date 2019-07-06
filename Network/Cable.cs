@@ -49,6 +49,8 @@ namespace DimensionalStorage.Network
 			Component?.Update();
 		}
 
+		public override bool Interact() => Component?.Interact() ?? false;
+
 		public override TagCompound Save()
 		{
 			TagCompound tag = new TagCompound();

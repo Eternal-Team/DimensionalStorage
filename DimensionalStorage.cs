@@ -1,10 +1,12 @@
 using BaseLibrary;
 using DimensionalStorage.Network;
+using Starbound.Input;
+using Terraria;
+using Terraria.GameInput;
 using Terraria.ModLoader;
 
 namespace DimensionalStorage
 {
-	// central processor, co-processors (IO, disks, autocrafting...)
 	// IO (items, fluids, energy???) (import, export, storage bus)
 	// disks (various sizes)
 	// auto-crafting (tree)
@@ -21,7 +23,21 @@ namespace DimensionalStorage
 		{
 			Instance = this;
 
-			NetworkLayer=new NetworkLayer();
+			NetworkLayer = new NetworkLayer();
+
+			if (!Main.dedServ)
+			{
+				MouseEvents.ButtonPressed += (sender, args) =>
+				{
+					if (args.Button != MouseButton.Right) return;
+
+					if (NetworkLayer.Interact())
+					{
+						Main.mouseRight = Main.mouseRightRelease = false;
+						if (PlayerInput.MouseKeys.Contains("Mouse2")) PlayerInput.MouseKeys.Remove("Mouse2");
+					}
+				};
+			}
 		}
 
 		public override void Unload()
