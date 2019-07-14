@@ -1,6 +1,8 @@
-﻿using ContainerLibrary;
+﻿using BaseLibrary;
+using ContainerLibrary;
 using DimensionalStorage.Components;
 using DimensionalStorage.Items;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -62,6 +64,45 @@ namespace DimensionalStorage.Network
 
 		public List<Item> Items => GetDrives().SelectMany(drive => drive.Items).ToList();
 
+		public void InsertItem(ref Item item)
+		{
+			if (item.IsAir) return;
+
+			foreach (Item other in Items)
+			{
+				if (other.type == item.type && other.stack < other.maxStack)
+				{
+					int count = Math.Min(item.stack, other.maxStack - other.stack);
+					other.stack += count;
+					item.stack -= count;
+					if (item.stack <= 0)
+					{
+						item.TurnToAir();
+						return;
+					}
+				}
+			}
+
+			foreach (ItemHandler drive in GetDrives())
+			{
+				for (int i = 0; i < drive.Items.Count; i++)
+				{
+					Item driveItem = drive.Items[i];
+					if (!driveItem.IsAir) continue;
+
+					driveItem.SetDefaults(item.type);
+					int count = Math.Min(item.stack, driveItem.maxStack - driveItem.stack);
+					driveItem.stack = count;
+					item.stack -= count;
+					if (item.stack <= 0)
+					{
+						item.TurnToAir();
+						return;
+					}
+				}
+			}
+		}
+
 		public Network(Cable tube)
 		{
 			Networks.Add(this);
@@ -106,10 +147,7 @@ namespace DimensionalStorage.Network
 		{
 			if (!IsValid) return;
 
-			foreach (BasePort port in GetPorts())
-			{
-				port.Update();
-			}
+			foreach (BasePort port in GetPorts()) port.Update();
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using ContainerLibrary;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -11,11 +12,13 @@ namespace DimensionalStorage.Items
 	{
 		public override bool CloneNewInstances => true;
 
+		public abstract int Capacity { get; }
+
 		public ItemHandler Handler { get; set; }
 
 		public BaseDrive()
 		{
-			Handler = new ItemHandler(10);
+			Handler = new ItemHandler(Capacity);
 		}
 
 		public override ModItem Clone()
@@ -32,7 +35,7 @@ namespace DimensionalStorage.Items
 
 		public override void ModifyTooltips(List<TooltipLine> tooltips)
 		{
-			//tooltips.Add(new TooltipLine(mod, "PortableStorage:BagTooltip", Language.GetText("Mods.PortableStorage.BagTooltip." + GetType().Name).Format(Handler.Slots)));
+			tooltips.Add(new TooltipLine(mod, "DimensionalStorage:DriveTooltip", Handler.Items.Count(i => !i.IsAir) + "/" + Capacity));
 		}
 
 		public override TagCompound Save() => new TagCompound
@@ -58,9 +61,41 @@ namespace DimensionalStorage.Items
 
 	public class BasicDrive : BaseDrive
 	{
+		public override int Capacity => 8;
+
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Basic Drive");
+		}
+	}
+
+	public class AdvancedDrive : BaseDrive
+	{
+		public override int Capacity => 16;
+
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Advanced Drive");
+		}
+	}
+
+	public class EliteDrive : BaseDrive
+	{
+		public override int Capacity => 32;
+
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Elite Drive");
+		}
+	}
+
+	public class UltimateDrive : BaseDrive
+	{
+		public override int Capacity => 64;
+
+		public override void SetStaticDefaults()
+		{
+			DisplayName.SetDefault("Ultimate Drive");
 		}
 	}
 }

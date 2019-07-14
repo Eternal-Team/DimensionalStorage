@@ -19,17 +19,12 @@ namespace DimensionalStorage.Network
 
 		public override void Update()
 		{
-			base.Update();
-
 			foreach (Network network in Network.Networks) network.Update();
 		}
 
 		public bool PlaceComponent<T>(BaseComponentItem<T> item) where T : BaseComponent, new()
 		{
-			int posX = Player.tileTargetX;
-			int posY = Player.tileTargetY;
-
-			if (TryGetValue(posX, posY, out Cable cable) && cable.Component == null)
+			if (TryGetValue(Player.tileTargetX, Player.tileTargetY, out Cable cable) && cable.Component == null)
 			{
 				cable.Component = new T {Parent = cable};
 				return true;
@@ -58,12 +53,7 @@ namespace DimensionalStorage.Network
 
 		public override bool Interact()
 		{
-			if (TryGetValue(Player.tileTargetX, Player.tileTargetY, out Cable cable))
-			{
-				return cable.Interact();
-			}
-
-			return false;
+			return TryGetValue(Player.tileTargetX, Player.tileTargetY, out Cable cable) && cable.Interact();
 		}
 	}
 }

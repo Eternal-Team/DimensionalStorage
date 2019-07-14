@@ -13,6 +13,7 @@ namespace DimensionalStorage
 	// terminals (crafting - similar to what Container Library does)
 	// security - player whitelists
 	// remote access (hand-held item, quantum bridges)
+	// annihilation/creation port (pickup/drop items)
 
 	public class DimensionalStorage : Mod
 	{
