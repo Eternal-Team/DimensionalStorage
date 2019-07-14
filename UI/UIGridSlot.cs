@@ -3,7 +3,7 @@ using BaseLibrary.UI.Elements;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.ComponentModel;
+using System.Linq;
 using Terraria;
 using Terraria.GameContent.Achievements;
 using Terraria.ID;
@@ -17,24 +17,55 @@ namespace DimensionalStorage.UI
 	{
 		public Texture2D backgroundTexture = Main.inventoryBackTexture;
 
-		public IContainer Container;
-		public int slot;
-
-		/// <summary>
-		///     Current item, mouse item.
-		/// </summary>
-		public event Func<Item, Item, bool> CanInteract;
-
 		public event Action OnInteract;
 
+		private Network.Network Network;
 		public Item Item;
+		private int Stack => Item.maxStack > 1 ? Network.Items.Where(item => item.type == Item.type).Sum(item => item.stack) : 1;
 
-		public UIGridSlot(Item item)
+		public UIGridSlot(Network.Network network, Item item)
 		{
 			Width = Height = (40, 0);
 
+			Network = network;
 			Item = item;
 		}
+
+		/*
+			public override void ScrollWheel(UIScrollWheelEvent evt)
+		   {
+		   if (!Main.keyState.IsKeyDown(Keys.LeftAlt)) return;
+		   
+		   if (evt.ScrollWheelValue > 0)
+		   {
+		   if (Main.mouseItem.type == Item.type && Main.mouseItem.stack < Main.mouseItem.maxStack)
+		   {
+		   Main.mouseItem.stack++;
+		   if (--Item.stack <= 0) Item.TurnToAir();
+		   }
+		   else if (Main.mouseItem.IsAir)
+		   {
+		   Main.mouseItem = Item.Clone();
+		   Main.mouseItem.stack = 1;
+		   if (--Item.stack <= 0) Item.TurnToAir();
+		   }
+		   }
+		   else if (evt.ScrollWheelValue < 0)
+		   {
+		   if (Item.type == Main.mouseItem.type && Item.stack < Item.maxStack)
+		   {
+		   Item.stack++;
+		   if (--Main.mouseItem.stack <= 0) Main.mouseItem.TurnToAir();
+		   }
+		   else if (Item.IsAir)
+		   {
+		   Item = Main.mouseItem.Clone();
+		   Item.stack = 1;
+		   if (--Main.mouseItem.stack <= 0) Main.mouseItem.TurnToAir();
+		   }
+		   }
+		   }
+		*/
 
 		public override void Click(UIMouseEvent evt)
 		{
@@ -43,23 +74,21 @@ namespace DimensionalStorage.UI
 
 			if (ItemSlot.ShiftInUse)
 			{
-				//Item = PutItemInInventory(Item.type, Item.stack);
-				//Utility.LootAll(Handler, (item, index) => index == slot);
+				Item = Utility.PutItemInInventory(Item);
+
 				OnInteract?.Invoke();
+
+				base.Click(evt);
+
 				return;
 			}
 
-			//if (Main.mouseItem.IsAir) Main.mouseItem = Handler.ExtractItem(slot, Item.maxStack);
-			//else
-			//{
-			//	if (Item.IsTheSameAs(Main.mouseItem)) Main.mouseItem = Handler.InsertItem(slot, Main.mouseItem);
-			//	else
-			//	{
-			//		Item temp = Item;
-			//		Utils.Swap(ref temp, ref Main.mouseItem);
-			//		Item = temp;
-			//	}
-			//}
+			if (Main.mouseItem.IsAir) Main.mouseItem = Network.ExtractItem(Item);
+			else
+			{
+				Network.InsertItem(ref Main.mouseItem);
+				Main.PlaySound(SoundID.Grab);
+			}
 
 			if (Item.stack > 0) AchievementsHelper.NotifyItemPickup(player, Item);
 
@@ -83,18 +112,17 @@ namespace DimensionalStorage.UI
 
 			if (player.itemAnimation > 0) return;
 
-			bool specialClick = false;
-			if (ItemLoader.CanRightClick(Item) && Main.mouseRightRelease)
-			{
-				ItemLoader.RightClick(Item, player);
-				specialClick = true;
-			}
+			//bool specialClick = false;
+			//if (ItemLoader.CanRightClick(Item) && Main.mouseRightRelease)
+			//{
+			//	specialClick = true;
+			//}
 
-			if (specialClick && Main.mouseRightRelease)
-			{
-				OnInteract?.Invoke();
-				return;
-			}
+			//if (specialClick && Main.mouseRightRelease)
+			//{
+			//	OnInteract?.Invoke();
+			//	return;
+			//}
 
 			if (Main.stackSplit <= 1 && Main.mouseRight)
 			{
@@ -125,11 +153,11 @@ namespace DimensionalStorage.UI
 			OnInteract?.Invoke();
 		}
 
-		public override int CompareTo(object obj) => Item.type.CompareTo(((UIGridSlot)obj).Item.type);
+		public override int CompareTo(object obj) => -(Item.type - ((UIGridSlot)obj).Item.type);
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
-			spriteBatch.DrawSlot(Dimensions, Color.White, !Item.IsAir && Item.favorited ? Main.inventoryBack10Texture : backgroundTexture);
+			spriteBatch.DrawSlot(Dimensions, Color.White, backgroundTexture);
 
 			float scale = Math.Min(Dimensions.Width / backgroundTexture.Width, Dimensions.Height / backgroundTexture.Height);
 
@@ -164,13 +192,15 @@ namespace DimensionalStorage.UI
 
 				ItemLoader.PostDrawInInventory(Item, spriteBatch, position2, rect, Item.GetAlpha(newColor), Item.GetColor(Color.White), origin, drawScale * pulseScale);
 				if (ItemID.Sets.TrapSigned[Item.type]) spriteBatch.Draw(Main.wireTexture, Dimensions.Position() + new Vector2(40f, 40f) * scale, new Rectangle(4, 58, 8, 8), Color.White, 0f, new Vector2(4f), 1f, SpriteEffects.None, 0f);
-				if (Item.stack > 1) ChatManager.DrawColorCodedStringWithShadow(spriteBatch, Main.fontItemStack, Item.stack < 1000 ? Item.stack.ToString() : Item.stack.ToSI("N1"), Dimensions.Position() + new Vector2(10f, 26f) * scale, Color.White, 0f, Vector2.Zero, new Vector2(scale), -1f, scale);
+				if (Stack > 1)
+					ChatManager.DrawColorCodedStringWithShadow(spriteBatch, Main.fontItemStack, Stack < 1000 ? Stack.ToString() : Stack.ToSI("N0"), Dimensions.Position() + new Vector2(10f, 26f) * scale, Color.White, 0f, Vector2.Zero, new Vector2(scale), -1f, scale);
 
 				if (IsMouseHovering)
 				{
 					Main.LocalPlayer.showItemIcon = false;
 					Main.ItemIconCacheUpdate(0);
 					Main.HoverItem = Item.Clone();
+					Main.HoverItem.stack = Stack;
 					Main.hoverItemName = Main.HoverItem.Name;
 
 					if (ItemSlot.ShiftInUse) Hooking.SetCursor("Terraria/UI/Cursor_7");

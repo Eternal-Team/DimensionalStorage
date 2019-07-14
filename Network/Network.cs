@@ -64,9 +64,65 @@ namespace DimensionalStorage.Network
 
 		public List<Item> Items => GetDrives().SelectMany(drive => drive.Items).ToList();
 
+		public int CountItem(int type) => Items.Sum(item => item.type == type ? item.stack : 0);
+
+		public IEnumerable<Item> GetItemsOfType(int type)
+		{
+			List<Item> items = new List<Item>();
+			foreach (Item item in Items)
+			{
+				if (item.type == type) items.Add(item);
+			}
+
+			return items.OrderBy(item => item.stack);
+		}
+
+		public Item ExtractItem(Item toExtract, int stack = 0)
+		{
+			Item ret;
+
+			if (toExtract.maxStack == 1)
+			{
+				ret = toExtract.Clone();
+				toExtract.TurnToAir();
+				return ret;
+			}
+
+			ret = new Item();
+			ret.SetDefaults(toExtract.type);
+			int count = Math.Min(stack > 0 ? stack : ret.maxStack, CountItem(toExtract.type));
+			ret.stack = count;
+
+			foreach (Item item in GetItemsOfType(toExtract.type))
+			{
+				int diff = Math.Min(item.stack, count);
+				item.stack -= diff;
+				count -= diff;
+				if (item.stack <= 0) item.TurnToAir();
+				if (count <= 0) return ret;
+			}
+
+			return ret;
+		}
+
 		public void InsertItem(ref Item item)
 		{
 			if (item.IsAir) return;
+
+			if (item.maxStack == 1)
+			{
+				foreach (ItemHandler drive in GetDrives())
+				{
+					for (int i = 0; i < drive.Items.Count; i++)
+					{
+						if (!drive.Items[i].IsAir) continue;
+
+						drive.Items[i] = item.Clone();
+						item.TurnToAir();
+						return;
+					}
+				}
+			}
 
 			foreach (Item other in Items)
 			{
@@ -85,20 +141,12 @@ namespace DimensionalStorage.Network
 
 			foreach (ItemHandler drive in GetDrives())
 			{
-				for (int i = 0; i < drive.Items.Count; i++)
+				foreach (Item driveItem in drive.Items.Where(i => i.IsAir))
 				{
-					Item driveItem = drive.Items[i];
-					if (!driveItem.IsAir) continue;
-
 					driveItem.SetDefaults(item.type);
-					int count = Math.Min(item.stack, driveItem.maxStack - driveItem.stack);
-					driveItem.stack = count;
-					item.stack -= count;
-					if (item.stack <= 0)
-					{
-						item.TurnToAir();
-						return;
-					}
+					driveItem.stack = item.stack;
+					item.TurnToAir();
+					return;
 				}
 			}
 		}

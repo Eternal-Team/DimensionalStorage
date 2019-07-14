@@ -3,6 +3,7 @@ using BaseLibrary.UI;
 using BaseLibrary.UI.Elements;
 using DimensionalStorage.Components;
 using Microsoft.Xna.Framework;
+using System.Linq;
 using Terraria;
 
 namespace DimensionalStorage.UI
@@ -11,9 +12,12 @@ namespace DimensionalStorage.UI
 	{
 		private UIGrid<UIGridSlot> gridItems;
 
+		private Network.Network Network => Container.Parent.Network;
+
 		public override void OnInitialize()
 		{
-			Width = Height = (0, 0.25f);
+			Width = (408, 0);
+			Height = (304, 0);
 			this.Center();
 
 			UIText textLabel = new UIText("Access Terminal")
@@ -37,11 +41,8 @@ namespace DimensionalStorage.UI
 				Width = (0, 1),
 				Height = (-28, 1)
 			};
-			gridItems.OnClick += (a, b) =>
-			{
-				Container.Parent.Network.InsertItem(ref Main.mouseItem);
-				PopulateGrid();
-			};
+			gridItems.OnClick += (evt, element) => PopulateGrid();
+			gridItems.OnRightClick+= (evt, element) => PopulateGrid();
 			Append(gridItems);
 
 			PopulateGrid();
@@ -51,12 +52,17 @@ namespace DimensionalStorage.UI
 		{
 			gridItems.Clear();
 
-			// technically only care about unique types and stacks
-
-			foreach (Item item in Container.Parent.Network.Items)
+			foreach (Item item in Network.Items)
 			{
-				UIGridSlot slot = new UIGridSlot(item);
+				if (item.maxStack > 1 && gridItems.items.Any(gridSlot => gridSlot.Item.type == item.type)) continue;
+
+				UIGridSlot slot = new UIGridSlot(Network, item);
 				gridItems.Add(slot);
+			}
+
+			while (gridItems.Count < 54 || gridItems.Count % 9 != 0)
+			{
+				gridItems.Add(new UIGridSlot(Network, new Item()));
 			}
 		}
 	}
