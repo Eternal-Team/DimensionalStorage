@@ -42,7 +42,7 @@ namespace DimensionalStorage.UI
 				Height = (-28, 1)
 			};
 			gridItems.OnClick += (evt, element) => PopulateGrid();
-			gridItems.OnRightClick+= (evt, element) => PopulateGrid();
+			gridItems.OnRightClick += (evt, element) => PopulateGrid();
 			Append(gridItems);
 
 			PopulateGrid();

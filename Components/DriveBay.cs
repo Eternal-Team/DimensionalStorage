@@ -16,7 +16,7 @@ namespace DimensionalStorage.Components
 
 		public DriveBay()
 		{
-			ID = Guid.NewGuid();
+			UUID = Guid.NewGuid();
 
 			Drives = new ItemHandler(4);
 			Drives.IsItemValid += (slot, item) => item.modItem is BaseDrive;
@@ -24,13 +24,13 @@ namespace DimensionalStorage.Components
 
 		public override TagCompound Save() => new TagCompound
 		{
-			["ID"] = ID.ToString(),
+			["UUID"] = UUID,
 			["Drives"] = Drives.Save()
 		};
 
 		public override void Load(TagCompound tag)
 		{
-			ID = tag.ContainsKey("ID") ? Guid.Parse(tag.GetString("ID")) : ID;
+			UUID = tag.Get<Guid>("UUID");
 			Drives.Load(tag.GetCompound("Drives"));
 		}
 
@@ -41,7 +41,7 @@ namespace DimensionalStorage.Components
 			return true;
 		}
 
-		public Guid ID { get; set; }
+		public Guid UUID { get; set; }
 		public BaseUIPanel UI { get; set; }
 		public LegacySoundStyle CloseSound => SoundID.Item1;
 		public LegacySoundStyle OpenSound => SoundID.Item1;

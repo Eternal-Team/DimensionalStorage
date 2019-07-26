@@ -113,7 +113,7 @@ namespace DimensionalStorage.Network
 			{
 				foreach (ItemHandler drive in GetDrives())
 				{
-					for (int i = 0; i < drive.Items.Count; i++)
+					for (int i = 0; i < drive.Slots; i++)
 					{
 						if (!drive.Items[i].IsAir) continue;
 

@@ -50,12 +50,12 @@ namespace DimensionalStorage.Items
 
 		public override void NetSend(BinaryWriter writer)
 		{
-			Handler.Serialize(writer);
+			Handler.Write(writer);
 		}
 
 		public override void NetRecieve(BinaryReader reader)
 		{
-			Handler.Deserialize(reader);
+			Handler.Read(reader);
 		}
 	}
 

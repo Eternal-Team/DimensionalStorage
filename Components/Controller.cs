@@ -13,14 +13,14 @@ namespace DimensionalStorage.Components
 		public override int PortCapacity => 8;
 		public override int DriveCapacity => 4;
 
-		public Guid ID { get; set; }
+		public Guid UUID { get; set; }
 		public BaseUIPanel UI { get; set; }
 		public LegacySoundStyle CloseSound => SoundID.Item1;
 		public LegacySoundStyle OpenSound => SoundID.Item1;
 
 		public Controller()
 		{
-			ID = Guid.NewGuid();
+			UUID = Guid.NewGuid();
 		}
 
 		public override bool Interact()
@@ -32,12 +32,12 @@ namespace DimensionalStorage.Components
 
 		public override TagCompound Save() => new TagCompound
 		{
-			["ID"] = ID.ToString()
+			["UUID"] = UUID
 		};
 
 		public override void Load(TagCompound tag)
 		{
-			ID = tag.ContainsKey("ID") ? Guid.Parse(tag.GetString("ID")) : ID;
+			UUID = tag.Get<Guid>("UUID");
 		}
 	}
 }

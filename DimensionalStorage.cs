@@ -7,13 +7,13 @@ using Terraria.ModLoader;
 
 namespace DimensionalStorage
 {
-	// IO (items, fluids, energy???) (import, export, storage bus)
-	// disks (various sizes)
-	// auto-crafting (tree)
-	// terminals (crafting - similar to what Container Library does)
-	// security - player whitelists
-	// remote access (hand-held item, quantum bridges)
-	// annihilation/creation port (pickup/drop items)
+	// todo: IO (items, fluids, energy???) (import, export, storage bus)
+	// todo: disks (various sizes)
+	// todo: auto-crafting (tree)
+	// todo: terminals (crafting - similar to what Container Library does)
+	// todo: security - player whitelists
+	// todo: remote access (hand-held item, quantum bridges)
+	// todo: annihilation/creation port (pickup/drop items)
 
 	public class DimensionalStorage : Mod
 	{
